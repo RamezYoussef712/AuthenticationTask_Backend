@@ -9,7 +9,9 @@ export default class AuthController {
     try {
       data = await request.validate(RegisterValidator)
     } catch (errors) {
-      return response.status(400).send({ success: false, errors: [errors.messages.errors] })
+      let errorMessage: string[] = []
+      errors.messages.errors.forEach((element) => errorMessage.push(element.message))
+      return response.status(400).send({ success: false, errors: errorMessage })
     }
     try {
       const user = await User.create({ ...data })
@@ -17,7 +19,10 @@ export default class AuthController {
         const token = await auth.use('api').attempt(data.email, data.password, {
           expiresIn: '1 hour',
         })
-        return response.status(200).send({ success: true, data: [user, token.toJSON()] })
+        const authToken = token.toJSON()
+        return response
+          .status(200)
+          .send({ success: true, data: { user: user, access_token: authToken.token } })
       }
     } catch (error) {
       return response.status(400).send({ success: false, errors: ['Registration failed'] })
@@ -29,22 +34,28 @@ export default class AuthController {
     try {
       data = await request.validate(LoginValidator)
     } catch (errors) {
-      return response.status(400).send({ success: false, errors: [errors.messages.errors] })
+      let errorMessage: string[] = []
+      errors.messages.errors.forEach((element) => errorMessage.push(element.message))
+      return response.status(400).send({ success: false, errors: errorMessage })
     }
     try {
       const token = await auth.use('api').attempt(data.email, data.password, {
         expiresIn: '1 hour',
       })
-      return response.status(200).send({ success: true, data: token.toJSON() })
+      const user = await User.findByOrFail('email', data.email)
+      const authToken = token.toJSON()
+      return response
+        .status(200)
+        .send({ success: true, data: { user: user, access_token: authToken.token } })
     } catch {
       return response
         .status(400)
-        .send({ error: { message: 'User with provided credentials could not be found' } })
+        .send({ success: false, errors: ['User with provided credentials could not be found'] })
     }
   }
 
   public async logout({ auth, response }: HttpContextContract) {
     await auth.use('api').revoke()
-    return response.status(203).send({ success: true, data: [] })
+    return response.status(203).send({ success: true })
   }
 }

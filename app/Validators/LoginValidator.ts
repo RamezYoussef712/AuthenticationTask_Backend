@@ -29,7 +29,7 @@ export default class LoginValidator {
       rules.required(),
       rules.normalizeEmail({ allLowercase: true }),
     ]),
-    password: schema.string({}, [rules.minLength(8)]),
+    password: schema.string(),
   })
 
   /**
@@ -46,6 +46,5 @@ export default class LoginValidator {
   public messages: CustomMessages = {
     'email.required': 'Email is required',
     'password.required': 'Password is required',
-    'password.minLength': 'Password must be at least 8 characters',
   }
 }

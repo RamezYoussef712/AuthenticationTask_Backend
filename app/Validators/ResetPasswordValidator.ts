@@ -40,6 +40,8 @@ export default class ResetPasswordValidator {
    *
    */
   public messages: CustomMessages = {
+    'password.required': 'Password is required',
+    'password.minLength': 'Password must be at least 8 characters',
     'password.confirmed': 'Password confirmation does not match you password',
   }
 }

@@ -13,7 +13,9 @@ export default class ForgetPasswordsController {
     try {
       data = await request.validate(ForgetPasswordValidator)
     } catch (errors) {
-      return response.status(400).send({ success: false, errors: [errors.messages.errors] })
+      let errorMessage: string[] = []
+      errors.messages.errors.forEach((element) => errorMessage.push(element.message))
+      return response.status(400).send({ success: false, errors: errorMessage })
     }
     try {
       const user = await User.findByOrFail('email', data.email)
@@ -49,7 +51,9 @@ export default class ForgetPasswordsController {
     try {
       data = await request.validate(ResetPasswordValidator)
     } catch (errors) {
-      return response.status(400).send({ success: false, errors: [errors.messages.errors] })
+      let errorMessage: string[] = []
+      errors.messages.errors.forEach((element) => errorMessage.push(element.message))
+      return response.status(400).send({ success: false, errors: errorMessage })
     }
     const token = data.token
     const password = data.password
